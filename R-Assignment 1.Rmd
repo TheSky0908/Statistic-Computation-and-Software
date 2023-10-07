@@ -1,0 +1,908 @@
+---
+title: "Assignment 1"
+author: "12111603谭致恒"
+date: "2023-09-24"
+output: html_document
+keep_tex: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,out.width='85%')
+setwd(normalizePath("."))
+getwd()
+```
+
+## R Markdown
+
+## Question 1
+# (a)
+
+
+```{r}
+#打开iris数据集
+library(datasets)
+data("iris") 
+iris_species <- iris$Species
+#运用factor
+fdata <- factor(iris_species,labels = c("a","b","c"))
+table(fdata)
+```
+每种花都是50朵。
+
+# (b)
+```{r}
+colors = c("darkgreen","darkgreen","darkgreen")
+boxplot(Sepal.Length ~ Species, data = iris, 
+        main = "Sepal length distribution for each type of irises",
+        xlab = "Species", ylab = "Sepal Length",
+        col = colors)
+```
+
+
+# (c)
+首先筛选出长度大于5.5的花
+```{r}
+filtered_data <- subset(iris, Sepal.Length > 5.5) #筛选＞5.5
+filtered_data
+```
+
+然后我们绘制3×2的箱线图（每个品种的两个箱线图并排放置）
+```{r}
+data_setosa <- subset(filtered_data, Species %in% c("setosa"))
+
+data_versicolor <- subset(filtered_data,Species %in% c("versicolor"))
+
+data_virginica <- subset(filtered_data,Species %in% c("virginica"))
+
+
+# 3×2的图形布局
+par(mfrow = c(3, 2))
+
+boxplot(Petal.Length ~ Species, data = data_setosa , 
+        main = "Boxplot of Petal Length by Species Setosa (Sepal Length > 5.5)",
+        xlab = "Species", ylab = "Petal Length")
+
+boxplot(Petal.Width ~ Species, data = data_setosa,
+        main = "Boxplot of Petal Width by Species Setosa (Sepal Length > 5.5)",
+        xlab= "Species", ylab = "Petal Width")
+boxplot(Petal.Length ~ Species, data = data_versicolor , 
+        main = "Boxplot of Petal Length by Species Versicolor(Sepal Length > 5.5)",
+        xlab = "Species", ylab = "Petal Length")
+
+boxplot(Petal.Width ~ Species, data =data_versicolor,
+        main = "Boxplot of Petal Width by Species Versicolor(Sepal Length > 5.5)",
+        xlab= "Species", ylab = "Petal Width")
+boxplot(Petal.Length ~ Species, data = data_virginica  , 
+        main = "Boxplot of Petal Length by Species Virginica(Sepal Length > 5.5)",
+        xlab = "Species", ylab = "Petal Length")
+
+boxplot(Petal.Width ~ Species, data = data_virginica ,
+        main = "Boxplot of Petal Width by Species Virginica (Sepal Length > 5.5)",
+        xlab= "Species", ylab = "Petal Width")
+
+
+
+```
+
+
+# Question 2
+# (a)
+```{r}
+
+
+data = read.csv("C:/Users/Lenovo/Desktop/R/Chapter 1/F2000.csv")
+value = data$marketvalue
+
+
+# 写一个计算skewness的函数
+skewness <- function(input){
+  
+average <- mean(input)
+for(i in 1:2000){
+  input[[i]] <- input[[i]] - average
+  #求出x-xbar
+}
+
+cubic_sum = 0
+for(j in 1:2000){
+  cubic_sum = cubic_sum + input[[j]]^3
+  #计算立方和
+}
+
+square_sum = 0
+for(k in 1:2000){
+  square_sum = square_sum + input[[k]]^2
+  #计算平方和
+}
+
+#代入skewness公式进行计算
+skewness2 = cubic_sum*sqrt(1999)/square_sum^(3/2)
+
+return(skewness2)
+
+}
+ skewness(value)
+#经检验，代入skewness公式进行计算得到的偏度与调包得到的结果高度一致，误差小于0.01
+```
+这2000家公司的marketvalue的偏度约为`r skewness(value)`。
+
+# (b)
+```{r}
+
+# taking log:
+log_value <- log(value)
+skewness_log <- skewness(log_value)
+skewness_log
+```
+故，取对数后的偏度为`r skewness_log`
+
+```{r}
+# taking inverse:
+inverse_value <- 1/value
+skewness_inverse <- skewness(inverse_value)
+skewness_inverse 
+```
+故，取倒数后的偏度为`r skewness_inverse`
+
+```{r}
+# taking Box&Cox:
+Box <- function(x){(x^0.25 - 1)/0.25}
+box_value <- Box(value)
+skewness_box <- skewness(box_value)
+skewness_box 
+```
+故，经Box&Cox后的偏度为`r skewness_box`
+
+# (c)
+```{r}
+#确定x轴范围
+summary(value)
+summary(log_value)
+summary(inverse_value)
+summary(box_value)
+
+#2×2的图
+par(mfrow = c(2, 2))
+
+# 绘制直方图
+hist(value, 
+     col = "blue",                 # 设置柱子颜色为蓝色
+     border = "black",              # 设置边界线颜色为黑色
+     main = " Original Histogram",            # 设置标题
+     xlab = "Values",               # 设置x轴标签
+     ylab = "Frequency",            # 设置y轴标签
+     breaks = 10,                    # 设置柱子的数量
+     xlim = c(0, 330),               # 设置x轴范围
+     ylim = c(0, 2000),                # 设置y轴范围
+     axes = TRUE,                   # 显示坐标轴
+     las = 1)                       # 设置刻度标签方向为水平
+
+# 绘制直方图，带有自定义设置
+hist(log_value, 
+     col = "red",                 # 设置柱子颜色为蓝色
+     border = "black",              # 设置边界线颜色为黑色
+     main = " Histogram (log)",            # 设置标题
+     xlab = "Values",               # 设置x轴标签
+     ylab = "Frequency",            # 设置y轴标签
+     breaks = 10,                    # 设置柱子的数量
+     xlim = c(-4, 6),               # 设置x轴范围
+     ylim = c(0, 2000),                # 设置y轴范围
+     axes = TRUE,                   # 显示坐标轴
+     las = 1)                       # 设置刻度标签方向为水平
+
+hist(inverse_value, 
+     col = "green",                 # 设置柱子颜色为蓝色
+     border = "black",              # 设置边界线颜色为黑色
+     main = "Histogram (inverse)",            # 设置标题
+     xlab = "Values",               # 设置x轴标签
+     ylab = "Frequency",            # 设置y轴标签
+     breaks = 10,                    # 设置柱子的数量
+     xlim = c(0, 50),               # 设置x轴范围
+     ylim = c(0, 2000),                # 设置y轴范围
+     axes = TRUE,                   # 显示坐标轴
+     las = 1)                       # 设置刻度标签方向为水平
+
+hist(box_value, 
+     col = "yellow",                 # 设置柱子颜色为蓝色
+     border = "black",              # 设置边界线颜色为黑色
+     main = " Histogram (box)",            # 设置标题
+     xlab = "Values",               # 设置x轴标签
+     ylab = "Frequency",            # 设置y轴标签
+     breaks = 10,                    # 设置柱子的数量
+     xlim = c(-3, 14),               # 设置x轴范围
+     ylim = c(0, 2000),                # 设置y轴范围
+     axes = TRUE,                   # 显示坐标轴
+     las = 1)                       # 设置刻度标签方向为水平
+
+```
+
+# (d)
+```{r}
+missing = is.na(data$profits) #找到缺失profits的公司
+missing2 <- data[missing,c("sales")] #调出他们的sales
+missing2
+summary(missing2) #fivenumber
+```
+# (e)
+```{r}
+
+country <- factor(data$country)
+
+
+
+for (i in 1:2000) {
+  if(country[i] == "Hong Kong/China"){
+    country[i] <- "China"
+  }
+  if(country[i] == "Taiwan"){
+    country[i] <- "China"
+  }
+  if(country[i] == "Kong/China"){
+    country[i] <- "China"
+  }
+}
+
+nlevels(country)#共有多少个国家
+
+```
+
+这里我们发现有“Taiwan，Hongkong/China 和 Kong/China”三个地区都应归为China这个国家。因此实际的国家数量应减去三个，即一共有58个国家。（此时上述三个地区的公司数量均为0个）
+
+```{r}
+table(country)#每个国家分别有多少公司
+total = numeric(58) #创建一个58个0的数组以用来存储每个国家有多少公司
+
+mean = array() #创建一个空数组以用来存储每个国家的资产均值
+median = array() #创建一个空数组以用来存储每个国家资产的中位数
+
+name <- unique(country) #找到58个国家的名字
+name
+```
+
+这里的name虽然有61个level，但是实际只有58个有值，因此Rstutio只输出了58个。
+
+```{r}
+for(i in 1:58){
+  asset = array()
+  for (j in 1:2000) {
+    if (country[j] == name[i]){
+      asset <- append(asset,data$assets[j])
+      total[i] <- total[i]+1
+    }
+  }
+  asset <- asset[-1] #去掉asset数组里面的第一个数（NA）
+  mean <- append(mean,mean(asset))
+  median <- append(median,median(asset))
+}
+
+mean <- mean[-1]
+median <- median[-1]
+
+result = data.frame(country = name, num_of_companies = total,
+                    mean_assets = mean,median_assets = median)
+result
+```
+
+得到了结果。
+
+```{r}
+write.table(result,"countries.txt",sep = ",") # 导出一个.txt文件用于存这个dataframe
+
+
+```
+
+# (f)
+
+```{r}
+#方法一
+selected = subset(data,data$sales > 100,c("rank","name","sales",
+                                          "profits","assets"))
+
+
+#方法二
+keep = rep(TRUE,2000) #keep表示哪些行要被保留，初始化为全是TRUE
+
+for(i in 1:2000){
+  if(data$sales[i] <= 100)
+    keep[i] <- FALSE #如果销售额小于100，则改行将被删掉
+}
+
+selected2 = data[keep,,drop = FALSE]
+selected2 = selected2[c("rank","name","sales","profits","assets")]
+
+
+sorted_1 = selected[order(-selected$sales),]#排序
+sorted_2 = selected[order(selected$assets),]#排序
+
+sorted_1 #输出按sales降序排列
+sorted_2 #输出按assets升序排列
+
+plot(selected$profits~selected$assets,xlab = "assets",ylab = "profits", 
+     col = "blue",main = "利润与资产散点图")
+```
+
+# (g)
+```{r}
+normalize_minmax <- function(x) {
+  return(100000*(x - min(x)) / (max(x) - min(x)))
+}
+
+# 处理数据
+normalized_sales <- normalize_minmax(data$sales)
+normalized_assets <- normalize_minmax(data$assets)
+normalized_marketvalue <- normalize_minmax(data$marketvalue)
+data$sales <- normalized_sales
+data$assets <- normalized_assets
+data$marketvalue <- normalized_marketvalue
+
+complete = data[!is.na(data$profits),]#找到没有缺失profits的公司
+
+missing = data[is.na(data$profits),]
+missing #找到缺失profits的公司
+
+matrix <- matrix( nrow = 5, ncol = 1995)
+#下面进行KNN
+
+for (j in 1:5) {
+  for (i in 1:1995) {
+    matrix[j,i] <- ((complete$sales[i]-missing$sales[j])^2
+    +(complete$assets[i]-missing$assets[j])^2
+    +(complete$marketvalue[i]-missing$marketvalue[j])^2)
+  }  
+}
+
+result <- rep(0,5)
+# 找到最“近”的10个公司的profits并求平均
+for (m in 1:5) {
+  index <- order(matrix[m,])[1:10]
+  #print(index)
+ # print(complete[index,c(5,7,8)])
+  average <- mean(complete$profits[index])
+  result[m] <- average
+  print(average)
+  #print(missing[m,c(5,7,8)])
+  #print(matrix[m,index])
+  # 助教哥哥姐姐一定很好奇为啥这个地方这么多代码被注掉了，
+  # 因为这个可怜的孩子debug快de了一个点才找到问题，孩子蠢哭了......
+}
+
+#complete[c(260,807,908,1406,1509),c(5,7,8)]
+
+
+# 赋值
+data$profits[missing$rank] <- result
+data$profits[missing$rank]
+
+
+```
+综上， 0.449  0.065  0.173 -0.009 -0.022 即为赋给残缺profits的值。
+
+# Question 3
+# (a)
+```{r}
+# Set the range of x-axis
+x <- seq(0, 8, length.out = 100)
+
+# Plot the density function for χ² distribution with df=4
+y_df4 <- dchisq(x, df = 4, ncp = 0)
+plot(x, y_df4, type = "l", col = "blue", lwd = 2,
+     xlab = "x", ylab = "Density", main = "Density Function of χ² Distribution")
+
+# Add the density function for χ² distribution with df=6
+y_df6 <- dchisq(x, df = 6, ncp = 0)
+lines(x, y_df6, col = "red", lwd = 2)
+
+# Add legend
+legend("topright", legend = c("df=4", "df=6"), col = c("blue", "red"), lwd = 2)
+
+
+# Calculate the area under the density curve for the interval [1, 7]
+area_1_7 <- pchisq(7, df = 5) - pchisq(1, df = 5)
+
+# Calculate the area under the density curve for the interval [3,∞)
+area_3_inf <- 1 - pchisq(3, df = 5)
+
+area_1_7
+area_3_inf
+```
+故，$[1,7]$之间的面积为`r area_1_7`，$[3,+\infty]$之间的面积为`r area_3_inf`。
+
+
+# (b)
+```{r}
+# 定义表示方程的函数
+equation <- function(lambda) {
+  return(exp(-lambda) - 0.8)
+}
+
+# 使用uniroot求解lambda
+solution <- uniroot(equation, interval = c(0,10))
+
+# 解将会在solution$root中获得
+lambda <- solution$root
+lambda
+```
+故，λ = `r lambda`。
+```{r}
+
+#计算P(X = 6)
+p = 1 - exp(-6*lambda)
+p
+
+```
+故，$Pr(X \le 6) =$ `r p`。
+
+
+
+
+# (c)
+因为$X_1,X_2 \stackrel{\text{i.i.d.}}{\sim} Uniform(0,1)$，则有：
+$$f_{(X_1,X_2)}(x_1,x_2) = f_{X_1}(x_1)\cdot f_{X_2}(x_2) = 1 \cdot I_{[0,1]\times[0,1]},$$
+其中$I_S$为集合$S$的示性函数。
+
+换元令$U = X_1+2X_2, V = X_1$，则有$X_1 = V, X_2 = \frac{U-V}{2}$。
+
+代入$X_1\in [0,1]$且$X_2\in [0,1]$可得：
+$$V \in [0,1], U\in [V,2+V]$$
+雅可比行列式的绝对值$|J|$ = $$Absolute\ value(\begin{vmatrix}\frac{\partial X_1}{\partial U} & \frac{\partial X_1}{\partial V}\\
+\frac{\partial X_2}{\partial U}& \frac{\partial X_2}{\partial V}
+\end{vmatrix})= \frac{1}{2}$$
+故$(U,V)$的联合密度为$$f_{(U,V)}(u,v) = f_{(X_1,X_2)}(x_1,x_2) |J| = \frac{1}{2}\times I_C$$
+其中$C = \{(U,V): V \in [0,1], U\in [V,2+V] \}$
+
+最后我们由联合密度求得$U = X_1 + 2X_2$的边际密度为
+f_U(u) =
+\begin{cases}
+     & \int_0^u\frac{1}{2} \mathrm{d}u, &u\in [0,1]\\
+     & \int_0^1\frac{1}{2} \mathrm{d}u, &u\in[1,2]\\
+     & \int_{u-2}^1\frac{1}{2} \mathrm{d}u, &u\in[2,3]
+
+\end{cases}
+    
+    
+即$U = X_1 + 2X_2$的密度为：
+f_U(u) = 
+\begin{cases}
+     & \frac{1}{2}u, &u\in [0,1]\\
+     & \frac{1}{2}, &u\in[1,2]\\
+     & \frac{1}{2}(3-u), &u\in[2,3]
+
+\end{cases}
+    
+    
+
+    
+    
+    
+    
+```{r}
+# 定义密度函数 f_U(u)
+f_U <- function(u) {
+  if (u >= 0 && u <= 1) {
+    return(0.5 * u)
+  } else if (u > 1 && u <= 2) {
+    return(0.5)
+  } else if (u > 2 && u <= 3) {
+    return(0.5 * (3 - u))
+  } else {
+    return(0)
+  }
+}
+
+# 生成 u 的取值范围
+u <- seq(0, 3, by = 0.01)
+
+# 计算对应的密度值
+density <- sapply(u, f_U)
+
+# 绘制密度函数图
+plot(u, density, type = "l", col = "blue", lwd = 2, xlab = "u", ylab = "f(u)", xlim = c(0,5),ylim = c(0,1), main = "密度函数 f(u)")
+
+# 添加区间分割线
+abline(v = c(1, 2), col = "red", lty = 2)
+axis(2, at = seq(0, 1, by = 0.1))
+
+```
+
+
+# (d)
+```{r}
+# 绘制概率密度函数
+x <- seq(-4, 4, length.out = 100)  # x值的范围
+
+# 标准正态分布
+dnorm_values <- dnorm(x)  # 计算标准正态分布的概率密度值
+
+# t(1)分布
+dt_values <- dt(x, df = 1)  # 计算自由度为1的t(1)分布的概率密度值
+
+# 绘图
+plot(x, dnorm_values, type = "l", col = "blue", lwd = 2, xlab = "x", ylab = "概率密度",
+     main = "概率密度函数比较")
+lines(x, dt_values, col = "red", lwd = 2)
+legend("topright", legend = c("标准正态分布", "t(1)分布"), col = c("blue", "red"), lwd = 2)
+## t(1)更厚尾一些
+
+
+```
+由图可得，t(1)更厚尾一些。
+
+# (e)
+先求超几何分布的期望$E(X) = n \frac{m}{N}, 其中X \sim H(n,m,N)$
+
+令$l = min\{n,m \}$，则有
+
+\begin{aligned} E(X)  
+   & = \sum_{k = 0}^{l}k\cdot P(X = k)\\
+   & = \sum_{k = 0}^{l}k\cdot \frac{C_m^k\cdot C_{N-m}^{n-k}}{C_N^n}\\
+   & = \sum_{k = 1}^{l}k\cdot \frac{C_m^k\cdot C_{N-m}^{n-k}}{C_N^n}\\
+   & = \sum_{k = 1}^{l} m \cdot C_{m-1}^{k-1} \cdot \frac{n}{N} \cdot \frac{C_{n-m}^{n-k}}{C_{N-1}^{n-1}}\\
+   & = m \cdot \frac{n}{N} \cdot \sum_{k = 1}^{l} C_{m-1}^{k-1} \cdot \frac{C_{n-m}^{n-k}}{C_{N-1}^{n-1}}\\
+   
+令i = k-1, \\
+   & = m \cdot \frac{n}{N} \cdot \sum_{i = 0}^{l-1}C_{m-1}^i \cdot \frac{C_{(N-1)-(m-1)}^{(n-1)-i}}{C_{N-1}^{n-1}} \\
+   & = m \cdot \frac{n}{N}\\
+   & = n \cdot \frac{m}{N}
+   
+\end{aligned}
+$$ $$
+
+下面我们推导超几何分布的方差$Var(X) = n\cdot \frac{m}{N}\cdot (1-\frac{m}{N})\cdot \frac{N-n}{N-1}$
+
+\begin{aligned}
+E(X^2)
+   & = \sum_{k = 0}^{l}k^2 \cdot P(X = k)\\
+   & = \sum_{k = 0}^{l}k^2 \cdot \frac{C_m^k\cdot C_{N-m}^{n-k}}{C_N^n}\\
+   & = \frac{mn}{N} \sum_{k = 1}^n (k-1+1)\frac{C_{m-1}^{k-1}C_{N-m}^{n-k}}{C_{N-1}^{n-1}}\\
+   & = \frac{mn}{N}\cdot (\sum_{k = 1}^{l} (k-1)\frac{C_{m-1}^{k-1}C_{N-m}^{n-k}}{C_{N-1}^{n-1}} + \sum_{k=1}^{l} \frac{C_{m-1}^{k-1}C_{N-m}^{n-k}}{C_{N-1}^{n-1}})\\
+   & = \frac{mn}{N}\cdot (\sum_{k = 2}^l (k-1)\frac{C_{m-1}^{k-1}C_{N-m}^{n-k}}{C_{N-1}^{n-1}} + 1)\\
+   & =  \frac{mn}{N}\cdot ( \frac{(m-1)(n-1)}{(N-1)} \sum_{k = 2}^l \frac{C_{m-2}^{k-2}C_{N-m}^{n-k}}{C_{N-2}^{n-2}}  + 1    )\\
+   & = \frac{mn}{N}\cdot ( \frac{(m-1)(n-1)}{(N-1)}  + 1    )\\
+
+
+\end{aligned}
+
+因此，\begin{aligned}
+
+Var(X) &= E(X^2) - (EX)^2 \\
+& = \frac{mn}{N}\cdot ( \frac{(m-1)(n-1)}{(N-1)}  + 1    ) - (\frac{nm}{N})^2\\
+& = n\cdot \frac{m}{N}\cdot (1-\frac{m}{N})\cdot \frac{N-n}{N-1}
+
+\end{aligned}
+
+```{r}
+
+
+reps = 10000
+result <- rep(0, reps)
+
+
+
+for (i in 1:reps) {
+  # 45样本不放回取样，设定前28个为统计，其余为科学。
+  value <- sample(1:45,8,replace = FALSE)
+  for (j in 1:8) {
+    if(value[j] <= 28){
+      result[i] <- result[i] + 1
+    }
+  }
+}
+
+prob <- table(result)
+probability <- prob/reps #得到Pr(X = k), k = 1,2,...,8
+probability
+```
+因此我们可以得到各个点的概率为：`r probability`。
+
+```{r}
+
+print(8*28/45) #期望理论值
+mean(result) #样本的期望
+print(8*28/45*(1-28/45)*(45-8)/(45-1)) #方差理论值
+var(result) #样本的方差
+
+```
+注意到理论值与试验得出来的结果非常接近，这说明理论推导的结果是正确的。
+
+
+
+
+# (f)
+```{r}
+# 进行数值搜索
+lambda <- 0  # 初始λ值
+prev_prob <- 1  # 初始概率
+while (prev_prob > 0.6) {
+  lambda <- lambda + 0.001  
+  prob <- sum(dpois(0:8, lambda)) 
+  prev_prob <- prob
+}
+
+max_lambda <- lambda - 0.001
+
+
+print(max_lambda)
+
+```
+故，满足条件的最大λ值为`r max_lambda`。
+
+
+# (g)
+
+```{r}
+
+
+par(mfrow = c(1, 2))
+
+z0 <- rexp(1000,3)
+
+hist(z0,main = " histogram of exp(3)'s pdf",probability = TRUE)
+x=pretty(c(0,100),1000);
+y=dexp(x,rate = 3)
+lines(x,y,col="red")
+
+
+
+z1 <- rgamma(1000,1,3)
+
+hist(z1,main = "histogram of gamma(1,3)'s pdf",probability = TRUE)
+x=pretty(c(0,100),1000);
+y=dgamma(x,1,3)
+lines(x,y,col="blue")
+
+```
+
+
+```{r}
+qqplot(z0,z1)
+
+```
+
+观察到Q-Q plot 近似为直线$y = x$，因此我们可以说z0 服从Exp(3)和z1服从gamma(1,3)的分布是同一个分布。
+
+```{r}
+x <- seq(0, 100, length.out = 1000)  # x值的范围
+
+
+exp_values <- dexp(x,rate = 3)
+
+gamma_values <- dgamma(x, shape = 1,rate = 3)  
+
+# 绘图
+plot(x, exp_values, type = "l", col = "blue", lwd = 4, xlab = "x", ylab = "概率密度",
+     main = "概率密度函数比较")
+lines(x, gamma_values, col = "red", lwd = 2)
+legend("topright", legend = c("Exp(3)的密度函数", "gamma(1，3)的密度函数"), col = c("blue", "red"), lwd = 2)
+```
+
+
+# (h)
+```{r}
+
+reps = 10000
+array <- rep(NA,reps)
+for (i in 1:reps) {
+  U <- sample(1:365,365,replace = TRUE)
+  for (j in 2:365) {
+    temp <- FALSE
+    for (k in 1:(j-1)) {
+      if(U[j] == U[k]){
+        array[i] = j
+        temp <- TRUE
+        break
+      }
+      
+    }
+    if(temp == TRUE)
+      break
+  }
+}
+
+result <- array[order(array)[0.75*reps+1]]
+result
+```
+故`r result`个人中有$75\%$的几率出现两人同一天生日。
+
+若想计算多少人以至少$\alpha$概率出现两人同一天生日，则只需将上述代码将参数$0.75$改成$\alpha$即可，下面给出$50\%$概率下的结果：
+
+```{r}
+reps = 10000
+array <- rep(NA,reps)
+for (i in 1:reps) {
+  U <- sample(1:365,365,replace = TRUE)
+  for (j in 2:365) {
+    temp <- FALSE
+    for (k in 1:(j-1)) {
+      if(U[j] == U[k]){
+        array[i] = j
+        temp <- TRUE
+        break
+      }
+      
+    }
+    if(temp == TRUE)
+      break
+  }
+}
+
+result <- array[order(array)[0.5*reps+1]]
+result
+```
+即`r result`个人中有$50\%$的几率出现两人同一天生日。
+
+
+# (i)
+```{r}
+# (i)
+
+n <- 1000 # 给定一个很大的n
+p = 0.6 # 给定一个p
+a = -1 # 给定a
+b = 1 # 给定b
+total = 1000
+reps = 10
+result1 <- rep(0,reps)
+
+for (m in 1:reps) {
+  sucess = 0
+for(j in 1:total){
+  
+  random <- runif(n,0,1)
+  r <- rep(NA,n)
+  for (i in 1:n) {
+    if(random[i] < p){
+      r[i] <- 1
+    } else{
+      r[i]  <- 0
+    }
+  }
+  # 以上我们得到了n个Bernoulli(P)的随机变量
+  
+  Z_n <- (sum(r) - n*p)/(sqrt(n*p*(1-p)))
+  
+  if((a<Z_n)&(Z_n<=b)){
+    sucess <- sucess + 1}
+  
+}
+
+result1[m] <- sucess/total
+
+
+}
+f <- function(x){
+  return(dnorm(x))
+}
+
+result2 <- integrate(f,a,b)
+
+
+result3 <- mean(result1)
+result3
+result2
+
+``` 
+二者相差不大，故该中心极限定理成立。
+
+
+# (j)
+```{r}
+p = 0.005 #给定p
+n = 1000 #给定n
+k = 5
+lambda = n*p
+total = 1000
+reps = 10
+result <- rep(0,reps)
+
+
+for (m in 1:reps) {
+  success = 0
+  for (j in 1:total) {
+    random <- runif(n,0,1)
+    r <- rep(NA,n)
+    for (i in 1:n) {
+      if(random[i] < p){
+        r[i] <- 1
+      } else{
+        r[i]  <- 0
+      }
+    }
+    #至此，已生成若干伯努利随即变量。
+    
+    S <- sum(r)
+    if(S == k){
+      success <- success + 1
+    }
+    
+  }
+  success/total
+  
+  
+  result[m] <- success/total
+}
+  mean(result)
+
+result2 <- exp(-lambda)*lambda^k/factorial(k)
+result2
+```
+
+二者相差不大，可以得出结论：该极限定理成立。
+
+# (k)
+```{r}
+number = 1000
+total = 1000
+n = 3
+m = 2
+result1 <- rep(0,total)
+result2 <- rep(0,total)
+
+
+# 计算概率
+
+for (j in 1:total) {
+  r <- rgeom(number,0.6)
+  
+  count = 0
+  count2 = 0
+  count3 = 0
+  for (i in 1:number) {
+    if(r[i] > n-1) #这里使输出空间由{0,1,2,...}变为{1,2,3,...}
+    {count <- count + 1}
+    
+    if(r[i] > m){
+      count2 <- count2 + 1}
+    
+    if(r[i] > m+n){
+      count3 <- count3 + 1}
+    
+  }
+  
+  result1[j] = count/total
+  result2[j] = count3/count2
+}
+
+mean(result1)
+mean(result2)
+
+```
+二者近似相等，顾客认为几何分布具有和指数分布一样的无记忆性。
+
+```{r}
+number = 1000
+total = 1000
+n = 3
+m = 3
+result1 <- rep(0,total)
+result2 <- rep(0,total)
+
+
+# 计算概率
+
+for (j in 1:total) {
+  r <- rpois(number,4)
+  
+  count = 0
+  count2 = 0
+  count3 = 0
+  for (i in 1:number) {
+    if(r[i] > n) 
+    {count <- count + 1}
+    
+    if(r[i] > m){
+      count2 <- count2 + 1}
+    
+    if(r[i] > m+n){
+      count3 <- count3 + 1}
+    
+  }
+  
+  result1[j] = count/total
+  result2[j] = count3/count2
+}
+
+mean(result1)
+mean(result2)
+```
+
+结果相差很大，故泊松分布不具有无记忆性。
